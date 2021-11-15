@@ -2,11 +2,10 @@ const express = require('express');
 const path = require('path');
 const fileUpload = require('express-fileupload');
 const ejs = require('ejs');
-const methodOverride = require('method-override')
+const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 const fs = require('fs');
 const Photo = require('./models/Photo');
-
 
 const app = express();
 
@@ -17,7 +16,7 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(fileUpload());
-app.use(methodOverride('_method'))
+app.use(methodOverride('_method', { methods: ['POST', 'GET'] }));
 
 app.set('view engine', 'ejs');
 
@@ -74,13 +73,18 @@ app.get('/photos/edit/:id', async (req, res) => {
   });
 });
 
-app.put('/photos/:id', async(req, res) => {
+app.put('/photos/:id', async (req, res) => {
   const photo = await Photo.findOne({ _id: req.params.id });
-  photo.title=req.body.title;
-  photo.description=req.body.description;
+  photo.title = req.body.title;
+  photo.description = req.body.description;
   photo.save();
 
-  res.redirect(`/photos/${req.params.id}`)
+  res.redirect(`/photos/${req.params.id}`);
+});
+
+app.delete('/photos/:id', async (req, res) => {
+  await Photo.findByIdAndRemove(req.params.id);
+  res.redirect('/');
 });
 
 const port = 3000;
